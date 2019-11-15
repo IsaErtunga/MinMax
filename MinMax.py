@@ -19,12 +19,15 @@ class State(object):
             [0, 0, 0],
             [0, 0, 0],
             [0, 0, 0],
-            ] 
+            ]
         
     def setState(self):
         self.state[1][0] = self.human
         self.state[1][1] = self.human
         self.state[1][2] = self.human
+
+    def printState(self):
+        print(self.state)
 
 
     """
@@ -97,18 +100,24 @@ class State(object):
 
 
 
+"""
+Tree class creates node for every state. 
+"""
 class Tree(object):
-
-    def __init__(self, name):
-        self.name = name
+    def __init__(self, stateID):
+        self.state = State()
         self.leaves = list()
+        
+        # StateID is a 2D array with 2 columns and x rows. Where first column is depth in tree,
+        # and the second is the index at the specific leaf
+        self.stateID = stateID
 
-    def addChild(self, name):
-        self.leaves.append(name)
+
+    def addChild(self, stateID):
+        self.leaves.append(stateID)
 
 
     def printTree(self, node):
-
         print(node.name)
         
         if len(node.leaves) == 0:
@@ -119,25 +128,35 @@ class Tree(object):
             child = node.leaves[i]
             node.printTree(child)
 
+
+    def printState(self):
+        self.state.printState()
+
+
+    def getState(self):
+        return self.state
+
+
+    def changeState(self):
+        self.state.setState()
+
+
+    def getID(self):
+        print(self.stateID)
+        return self.stateID
+
+
             
         
 
-visited = []
-a = Tree('Root')
-
-b = Tree('B')
+a = Tree([0, 0])
+b = Tree([1, 0])
+b.getID()
+b.changeState()
 a.addChild(b)
+state = a.leaves[0]
+state.printState()
 
-d = Tree('D')
-a.addChild(d)
-
-c = Tree('C')
-b.addChild(c)
-
-e = Tree('E')
-d.addChild(e)
-
-a.printTree(a)
 
 # for i in range(len(visited)):
 #     print(visited[i].name)
