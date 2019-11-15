@@ -1,6 +1,3 @@
-from anytree import Node, RenderTree
-
-
 class State(object):
 
     # 1 = X, -1 = O 
@@ -92,8 +89,8 @@ class State(object):
             return False
 
     def movePiece(self, player, row, column):
-        if acceptableMove(row, column):
-            self.state[row, column] = player
+        if self.acceptableMove(row, column):
+            self.state[row][column] = player
             return True
         else:
             return False
@@ -111,19 +108,16 @@ class Tree(object):
 
 
     def printTree(self, node):
+
+        print(node.name)
+        
         if len(node.leaves) == 0:
             print("No leaves")
             return
   
         for i in range(len(node.leaves)):
-            if len(node.leaves) == 0:
-                return
-            
-            
-            else:
-                print(node.leaves[i].name)
-                node = node.leaves[i]
-                node.printTree(node)
+            child = node.leaves[i]
+            node.printTree(child)
 
             
         
