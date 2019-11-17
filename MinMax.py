@@ -1,10 +1,11 @@
+import math
+
 class State(object):
 
-    # 1 = X, -1 = O 
-    human = 1
-    computer = -1
+    # 1 = O, -1 = X 
+    human = 'O'
+    computer = 'X'
 
-    
     #Score for Min-Max algorithm
     score = int()
 
@@ -14,22 +15,62 @@ class State(object):
      [0, 0, 0]
      [0, 0, 0]]
     """
-    def __init__(self):
+    def __init__(self, depth = 0, leafIndex = 0):
         self.state = [
             [0, 0, 0],
             [0, 0, 0],
             [0, 0, 0],
             ]
         
-    def setState(self):
-        self.state[1][0] = self.human
-        self.state[1][1] = self.human
-        self.state[1][2] = self.human
+        if depth == 0:
+            self.leafAmount = 9
+        elif depth ==1:
+            self.leafAmount = 8
+        elif depth == 2:
+            self.leafAmount = 7
+        elif depth == 3:
+            self.leafAmount = 6
+        elif depth == 4:
+            self.leafAmount = 5
+        elif depth == 5:
+            self.leafAmount = 4
+        elif depth == 6:
+            self.leafAmount = 3
+        elif depth == 7:
+            self.leafAmount = 2
+        elif depth == 8:
+            self.leafAmount = 1
+        elif depth == 9:
+            self.leafAmount = 0
+
+        self.leaves = list()
+        self.depth = depth
+        self.leafIndex = leafIndex
+        self.stateID = [depth, leafIndex]
+        self.parent = self
+        self.playerTurn = human
+
+
+    def addLeaf(self, leaf):
+        self.leaves.append(leaf)
+        leaf.parent = self
+
 
     def printState(self):
         print(self.state)
 
 
+    def printStateTree(self, node):
+        print("leaf ID and parent ID", node.stateID, node.parent.stateID)
+        print("\n", node.state)
+        
+        if len(node.leaves) == 0:
+            print("No leaves")
+            return
+  
+        for i in range(len(node.leaves)):
+            child = node.leaves[i]
+            node.printStateTree(child)
     """
     Function that tests if the current state is in fact a winning state. 
     Can win if a player has three marks on columns, rows or the diagonal
@@ -62,13 +103,18 @@ class State(object):
     """
     def checkGameScore(self):
         if self.winningState(self.human):
-            self.score = 1
+            return score = 1
         
         elif self.winningState(self.computer):
-            self.score = -1
+            return score = -1
         
         else:
-            self.score = 0
+            return score = 0
+
+
+
+    def gameOver(self, state):
+        return self.winningState(state, human) or self.winningState(state, computer)
 
 
     """
@@ -98,123 +144,100 @@ class State(object):
         else:
             return False
 
-
-
-"""
-Tree class creates node for every state. 
-"""
-class Tree(object):
-    def __init__(self, stateID):
-        self.state = State()
-        self.leaves = list()
+    # Maximize for human
+    def max(self):
+        maxValue = -2
         
-        # StateID is a 2D array with 2 columns and x rows. Where first column is depth in tree,
-        # and the second is the index at the specific leaf
-        self.stateID = stateID
+        row = None
+        column = None
 
+        result = self.checkGameScore()
 
-    def addChild(self, stateID):
-        self.leaves.append(stateID)
-
-
-    def printTree(self, node):
-        print(node.name)
+        if result == 1:
+            return (1, 0, 0)
         
-        if len(node.leaves) == 0:
-            print("No leaves")
-            return
-  
-        for i in range(len(node.leaves)):
-            child = node.leaves[i]
-            node.printTree(child)
+        elif result == -1:
+            return (-1, 0, 0)
 
-
-    def printState(self):
-        self.state.printState()
-
-
-    def getState(self):
-        return self.state
-
-
-    def changeState(self):
-        self.state.setState()
-
-
-    def getID(self):
-        print(self.stateID)
-        return self.stateID
-
-
-            
+        elif result == 0:
+            return (0, 0, 0)
         
-
-a = Tree([0, 0])
-b = Tree([1, 0])
-b.getID()
-b.changeState()
-a.addChild(b)
-state = a.leaves[0]
-state.printState()
-
-
-# for i in range(len(visited)):
-#     print(visited[i].name)
-
-# state = State()
-
-# state.setState()
-# print(state.winningState(1))
-# state.emptyCell()
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-'''class Node(object):
-
-    # löv initieras senare
-    def __init__(self, value):
-        self.value = value
-        self.leaves = list()
-
-    def printValues(self):
-        print(self.value)
-        print(self.leaves)
-        return self.value
+        for i in range(0, 3):
+            for j in range(0, 3):
+                if self.state[i][j] == 0:
+                    # On the empty field player 'O' makes a move and calls Min
+                    # That's one branch of the game tree.
+                    self.state[i][j] = 'O'
+                    (m, min_i, min_j) = self.min()
+                    # Fixing the maxv value if needed
+                    if m > maxValue:
+                        maxValue = m
+                        row = i
+                        column = j
+                    # Setting back the field to empty
+                    self.current_state[i][j] = '.'
+        return (maxValue, row, column)
     
 
 
 
+    # Player 'X' is min, in this case AI
+    def min(self):
 
-tree = Tree()
-tree.insertNode(root, 10, )'''
+        # We're initially setting it to 2 as worse than the worst case:
+        minv = 2
+
+        row = None
+        column = None
+
+        result = self.checkGameScore()
+
+        if result == -1:
+            return (-1, 0, 0)
+        elif result == 1:
+            return (1, 0, 0)
+        elif result == 0:
+            return (0, 0, 0)
+
+        for i in range(0, 3):
+            for j in range(0, 3):
+                if self.state[i][j] == 0:
+                    self.state[i][j] = 'X'
+                    (m, max_i, max_j) = self.max()
+                    if m < minv:
+                        minv = m
+                        row = i
+                        column = j
+                    self.current_state[i][j] = 0
+
+        return (minv, qx, qy)
+
+
+
+human = 1
+computer = -1
+
+
+def createTree(root):
+    # Root node (state)
+    row = int()
+    column = int()
+
+    if(root.depth == 2):
+        print("No leaves from createTree function")
+        return
+
+    i = 0
+    for index in range(root.leafAmount):
+        
+        row = math.floor(i/3)
+        column = math.floor(i % 3)
+
+        leaf = State(root.depth + 1, index)
+        leaf.movePiece(human, row, column)
+        root.addLeaf(leaf)
+        createTree(leaf)
+        i += 1
+
+    state.printStateTree(state)
+
