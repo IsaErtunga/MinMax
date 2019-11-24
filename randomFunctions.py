@@ -28,72 +28,110 @@ def createTree(root):
 
     state.printStateTree(state)
 
-    # Maximize for human
-    def max(self):
-        maxValue = -2
-        
-        row = None
-        column = None
+ 
+"""
+Computes max value for algorithm. 
+* Computer player. 'O' 
+"""
+def maxValue(state):
 
-        result = self.checkGameScore()
+    utilityValue = -2
+    evaluationScore = evaluateState(state)
 
-        if result == 1:
-            return (1, 0, 0)
-        
-        elif result == -1:
-            return (-1, 0, 0)
+    if evaluationScore == 1:
+        return (state, 1, -1, -1)
+    elif evaluationScore == -1:
+        return (state, -1, -1, -1)
+    elif evaluationScore == 0:
+        return (state, 0, -1, -1)
 
-        elif result == 0:
-            return (0, 0, 0)
+    row = 0
+    column = 0
+    newRow = None
+    newColumn = None
+    emptyCells = emptyCell(state)
+
+    for i in range (0, 3):
+        for j in range (0, 3):
+            if state[i][j] == '.':
+                state[i][j] = computer
+                (state, minUtility, row, column) = minValue(state)
+                
+                if minUtility > utilityValue:
+                    utilityValue = minUtility
+                    newRow = i
+                    newColumn = j
+                state[i][j] = '.'
+
+    return (state, utilityValue, newRow, newColumn)
+
+
+"""
+Computes min value for algorithm
+* Human player. 'X'
+"""
+def minValue(state):
+
+    utilityValue = 2
+    evaluationScore = evaluateState(state)
+
+    if evaluationScore == 1:
+        return (state,1, -1, -1)
+    elif evaluationScore == -1:
+        return (state,-1, -1, -1)
+    elif evaluationScore == 0:
+        return (state,0, -1, -1)
+
+    row = 0
+    column = 0
+    newRow = None
+    newColumn = None
+    emptyCells = emptyCell(state)
+
+    for i in range (0, 3):
+        for j in range (0, 3):
+            if state[i][j] == '.':
+                state[i][j] = human
+                (state, maxUtility, row, column) = maxValue(state)
         
-        for i in range(0, 3):
-            for j in range(0, 3):
-                if self.state[i][j] == 0:
-                    # On the empty field player 'O' makes a move and calls Min
-                    # That's one branch of the game tree.
-                    self.state[i][j] = 'O'
-                    (m, min_i, min_j) = self.min()
-                    # Fixing the maxv value if needed
-                    if m > maxValue:
-                        maxValue = m
-                        row = i
-                        column = j
-                    # Setting back the field to empty
-                    self.current_state[i][j] = '.'
-        return (maxValue, row, column)
+                if (maxUtility < utilityValue):
+                    utilityValue = maxUtility
+                    newRow = i
+                    newColumn = j
+                state[i][j] = '.'
+
+    return (state, utilityValue, newRow, newColumn)
     
 
 
 
-    # Player 'X' is min, in this case AI
-    def min(self):
 
-        # We're initially setting it to 2 as worse than the worst case:
-        minv = 2
+"""
+Minimax from youtube video
+"""
 
-        row = None
-        column = None
+def minimax(state, player):
+    emptyCells = emptyCell(state)
+    depth = len(emptyCells)
+    
+    if depth == 0 or evaluateState(state) == 1 or evaluateState(state) == -1 or evaluateState(state) == 0:
+        return evaluateState(state)
 
-        result = self.checkGameScore()
-
-        if result == -1:
-            return (-1, 0, 0)
-        elif result == 1:
-            return (1, 0, 0)
-        elif result == 0:
-            return (0, 0, 0)
-
-        for i in range(0, 3):
-            for j in range(0, 3):
-                if self.state[i][j] == 0:
-                    self.state[i][j] = 'X'
-                    (m, max_i, max_j) = self.max()
-                    if m < minv:
-                        minv = m
-                        row = i
-                        column = j
-                    self.current_state[i][j] = 0
-
-        return (minv, qx, qy)
-
-
+    if player == human:
+        maxUtility = -2
+        for [row, column] in emptyCells:
+            state[row][column] = human
+            newUtility = minimax(state, computer)
+            print(type(maxUtility), type(newUtility))
+            maxUtility = max(maxUtility, newUtility)
+            state[row][column] = '.'
+        return maxUtility
+    
+    else:
+        minUtility = 2
+        for [row, column] in emptyCells:
+            state[row][column] = computer
+            newUtility = minimax(state, human)
+            minUtility = min(minUtility, newUtility)
+            state[row][column] = '.'
+        return minUtility
