@@ -39,7 +39,7 @@ def evaluateState(state):
             return 1
         elif ['O', 'O', 'O'] in winningStates:
             return -1
-        else:
+        elif emptyCell(state) == 0:
             return 0
 
      
@@ -97,36 +97,114 @@ def movePiece(state, player, row, column):
 
 """
 Computes max value for algorithm. 
-* Human player.
+* Human player. 'X' 
 """
-def maxValue(state, row, column):
-    if gameOver(startingState):
-        return evaluateState(state), row, column
-    
-    # Lower than worst. -inf in book 
-    utilityVal = -2 
-    for [row, column] in emptyCell(state):
-        utilityVal = max(utilityVal, minValue(state, row, column))
+def maxValue(state):
 
+    utilityValue = -2
+
+    row = 0
+    column = 0
+
+    evaluationScore = evaluateState(state)
+
+    if evaluationScore == 1:
+        return 1
+    elif evaluationScore == -1:
+        return -1
+    elif evaluationScore == 0:
+        return 0
+
+    emptyCells = emptyCell(state)
     
+    for [row, column] in emptyCells:
+        movePiece(state, human, row, column)
+        utilityValue = max(utilityValue, minValue(state))
+
+        state[row][column] = '.'
+    print(utilityValue)
+    return utilityValue
 """
 Computes min value for algorithm
-* Computer player.
+* Computer player. 'O'
 """
-def minValue(state, row, column):
-    if gameOver(startingState):
-        return evaluateState(state), row, column
+def minValue(state):
 
-    utilityVal = 2
+    utilityValue = 2
 
-    for [row, column] in emptyCell(state):
-        utilityVal = min(utilityVal, maxValue(state, row, column))
+    row = 0
+    column = 0
+
+    evaluationScore = evaluateState(state)
+
+    if evaluationScore == 1:
+        return 1
+    elif evaluationScore == -1:
+        return -1
+    elif evaluationScore == 0:
+        return 0
+
+    emptyCells = emptyCell(state)
+    for [row, column] in emptyCells:
+        movePiece(state, computer, row, column)
+        utilityValue = min(utilityValue, maxValue(state))
+        state[row][column] = '.'
+    print(utilityValue)
+    return utilityValue
+    
+
+def minimax(state, player):
+    emptyCells = emptyCell(state)
+    depth = len(emptyCells)
+    
+    if depth == 0 or evaluateState(state) == 1 or evaluateState(state) == -1 or evaluateState(state) == 0:
+        return evaluateState(state)
+
+    if player == human:
+        maxUtility = -2
+        for [row, column] in emptyCells:
+            state[row][column] = human
+            newUtility = minimax(state, computer)
+            print(type(maxUtility), type(newUtility))
+            maxUtility = max(maxUtility, newUtility)
+            state[row][column] = '.'
+        return maxUtility
+    
+    else:
+        minUtility = 2
+        for [row, column] in emptyCells:
+            state[row][column] = computer
+            newUtility = minimax(state, human)
+            minUtility = min(minUtility, newUtility)
+            state[row][column] = '.'
+        return minUtility
+
+
 
 def play():
-    player_turn = 'X'
+    player_turn = human
     state = startingState
+    minMaxScore = int()
+   
     while True:
         printBoard(state)
+        result = evaluateState(state)
 
+        if player_turn == human:
+            while True:
+                minMaxScore = minimax(state, human)
+                row = int(input('Insert the X coordinate: '))
+                column = int(input('Insert the Y coordinate: '))
+                
+                if acceptableMove(state, row, column):
+                    movePiece(state, human, row, column)
+                    player_turn = computer
+                    break
+                else:
+                    print("bad move")
 
+        else:
+            minMaxScore = minimax(state, computer)
+            print(minMaxScore)
+            
 play()
