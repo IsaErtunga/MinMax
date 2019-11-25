@@ -33,14 +33,16 @@ def evaluateState(state):
             [state[0][0], state[1][1], state[2][2]],
             [state[2][0], state[1][1], state[0][2]],
         ]
-        
-        if ['X', 'X', 'X'] in winningStates:
-            return -1
-        elif ['O', 'O', 'O'] in winningStates:
-            return 1
-        elif emptyCell(state) == 0:
-            return 0
-
+        emptyCells = emptyCell(state)
+        if len(emptyCells) == 0:
+            if ['X', 'X', 'X'] in winningStates:
+                return -1
+            elif ['O', 'O', 'O'] in winningStates:
+                return 1
+            else:
+                return 0
+        else:
+            return
      
 """ 
 Function that sets score variable depending
@@ -94,63 +96,70 @@ def movePiece(state, player, row, column):
     else:
         return False
 
+"""
+Computes max value for algorithm. 
+* Computer player. 'O' 
+"""
+def maxValue(state):
 
-def minimax(state, depth, player):
-    emptyCells = emptyCell(state)
-    depth = len(emptyCells)
-    
+    utilityValue = -2
     evaluationScore = evaluateState(state)
-
     if evaluationScore == 1:
-        return evaluationScore
+        return 1
     elif evaluationScore == -1:
-        return evaluationScore
+        return -1
     elif evaluationScore == 0:
-        return evaluationScore
+        return 0
 
-    if len(emptyCells) == 0:
-        return
+    for i in range (0, 3):
+        for j in range (0, 3):
+            if state[i][j] == '.':
+                state[i][j] = computer
+                minUtility = minValue(state)
+                utilityValue = max(utilityValue, minUtility)
+                state[i][j] = '.'
+    return utilityValue
 
 
-    if player == computer:
-        maxUtility = -2
-        for i in range (0,3):
-            for j in range (0,3):
-                if state[i][j] == '.':
-                    state[i][j] = computer
-                    newUt = minimax(state, depth + 1, human)
-                    if (newUt == None):
-                        return
-                    bestUtility = max(maxUtility, newUt)
-                    state[i][j] = '.'
-        return bestUtility
+"""
+Computes min value for algorithm
+* Human player. 'X'
+"""
+def minValue(state):
+    i = 0
+    j = 0
+    utilityValue = 2
+    evaluationScore = evaluateState(state)
+    if evaluationScore == 1:
+        return 1
+    elif evaluationScore == -1:
+        return -1
+    elif evaluationScore == 0:
+        return 0
+
+    for i in range(3):
+        for j in range(3):
+            if state[i][j] == '.':
+                state[i][j] = human
+                maxUtility = maxValue(state)
+                utilityValue = min(utilityValue, maxUtility)
+                state[i][j] = '.'
+    return utilityValue
     
-    elif player == human:
-        minUtility = 2
-        for i in range (0,3):
-            for j in range (0,3):
-                if state[i][j] == '.':
-                    state[i][j] = human
-                    newUt = minimax(state, depth + 1, human)
-                    if (newUt == None):
-                        return
-                    bestUtility = min(minUtility, newUt) 
-                    state[i][j] = '.'
-                    
-        return bestUtility
+
 
 def findBestMove(state):
-    bestVal = -2
+    bestVal = 2
     row = -1
     column = -1
-    emptyCells = emptyCell(state)
+    
     for i in range (0,3):
         for j in range (0,3):
             if state[i][j] == '.':
                 state[i][j] = computer
-                moveVal = minimax(state, 0, computer)
+                moveVal = maxValue(state)
                 state[i][j] = '.'
-                if  moveVal > bestVal:
+                if  moveVal < bestVal:
                     row = i
                     column = j
                     bestVal = moveVal
@@ -158,31 +167,23 @@ def findBestMove(state):
 
 def play():
     
-    
+    #[['O', '.', 'X'], ['.', 'X', '.'], ['O', '.', 'X']]
     state = startingState
-    state[0][0] = human    
-    state[0][2] = human 
-    state[1][2] = human 
-    state[0][1] = computer 
-    state[1][0] = computer 
-    state[1][1] = computer 
-    
-    print(findBestMove(state)) 
-    
-    
-    
-    
-    
+    state[0][1] = computer    
+    state[1][1] = computer    
+
+
+    state[0][0] = human
+    state[2][2] = human
+
+    print(state)
+   
+    print(maxValue(state))
+    print(findBestMove(state))
     
     
-    
-    
-    
-    
-    
-    
-    
-    '''player_turn = human
+
+    '''playerTurn = human
     state = startingState
     minMaxScore = int()
    
@@ -198,27 +199,22 @@ def play():
         elif result == 0:
             print("Draw")
 
-        if player_turn == human:
+        if playerTurn == human:
         
             while True:
-                
-                (state, minScore, x, y) = minValue(state)
-                print("Recommended move: ", x, "+", y)
                 row = int(input('Insert the X coordinate: '))
                 column = int(input('Insert the Y coordinate: '))
                 
                 if acceptableMove(state, row, column):
-                    state = movePiece(state, human, row, column)
-                    player_turn = computer
+                    state[row][column] = human
+                    playerTurn = computer
                     break
                 else:
                     print("bad move")
 
-        elif player_turn == computer:
-            (state, maxScore, x, y) = maxValue(state)
-            print(x,y)
-            if acceptableMove(state, x, y):
-                    state = movePiece(state, computer, x, y)
-            player_turn = human'''
+        elif playerTurn == computer:
+            (x, y) = findBestMove(state)
+            state[x][y] = computer
+            playerTurn = human'''
             
 play()
