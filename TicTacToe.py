@@ -1,8 +1,8 @@
 """
 Tic-Tac-Toe game
 """
-# Human score = 1
-# Comp score = -1
+# Human score = -1
+# Comp score = 1
 human = 'X'
 computer = 'O'
 
@@ -34,40 +34,15 @@ def evaluateState(state):
             [state[2][0], state[1][1], state[0][2]],
         ]
         emptyCells = emptyCell(state)
-        if len(emptyCells) == 0:
-            if ['X', 'X', 'X'] in winningStates:
-                return -1
-            elif ['O', 'O', 'O'] in winningStates:
-                return 1
-            else:
-                return 0
+        if ['X', 'X', 'X'] in winningStates:
+            return -1
+        elif ['O', 'O', 'O'] in winningStates:
+            return 1
+        elif len(emptyCells) == 0:
+            return 0
         else:
             return
      
-""" 
-Function that sets score variable depending
-on which player won.
-1 = human wins
--1 = computer wins
-0 = draw
-"""
-def checkGameScore():
-    if evaluateState(human):
-        score = 1
-        return score
-    
-    elif evaluateState(computer):
-        score = -1
-        return score
-    
-    else:
-        score = 0
-        return score
-
-
-def gameOver(state):
-    return evaluateState(state) or evaluateState(state)
-
 
 """
 Returns list of empty cells with given coordinates
@@ -104,6 +79,7 @@ def maxValue(state):
 
     utilityValue = -2
     evaluationScore = evaluateState(state)
+
     if evaluationScore == 1:
         return 1
     elif evaluationScore == -1:
@@ -126,10 +102,10 @@ Computes min value for algorithm
 * Human player. 'X'
 """
 def minValue(state):
-    i = 0
-    j = 0
+
     utilityValue = 2
     evaluationScore = evaluateState(state)
+
     if evaluationScore == 1:
         return 1
     elif evaluationScore == -1:
@@ -137,8 +113,8 @@ def minValue(state):
     elif evaluationScore == 0:
         return 0
 
-    for i in range(3):
-        for j in range(3):
+    for i in range(0, 3):
+        for j in range(0, 3):
             if state[i][j] == '.':
                 state[i][j] = human
                 maxUtility = maxValue(state)
@@ -149,41 +125,23 @@ def minValue(state):
 
 
 def findBestMove(state):
-    bestVal = 2
-    row = -1
-    column = -1
+    moveScore = -2
     
     for i in range (0,3):
         for j in range (0,3):
             if state[i][j] == '.':
                 state[i][j] = computer
-                moveVal = maxValue(state)
+                optimalMoveScore = minValue(state)
                 state[i][j] = '.'
-                if  moveVal < bestVal:
+                if  optimalMoveScore > moveScore:
                     row = i
                     column = j
-                    bestVal = moveVal
+                    moveScore = optimalMoveScore
     return (row, column)
 
 def play():
-    
-    #[['O', '.', 'X'], ['.', 'X', '.'], ['O', '.', 'X']]
-    state = startingState
-    state[0][1] = computer    
-    state[1][1] = computer    
 
-
-    state[0][0] = human
-    state[2][2] = human
-
-    print(state)
-   
-    print(maxValue(state))
-    print(findBestMove(state))
-    
-    
-
-    '''playerTurn = human
+    playerTurn = human
     state = startingState
     minMaxScore = int()
    
@@ -215,6 +173,6 @@ def play():
         elif playerTurn == computer:
             (x, y) = findBestMove(state)
             state[x][y] = computer
-            playerTurn = human'''
+            playerTurn = human
             
 play()
