@@ -1,8 +1,12 @@
 """
 Tic-Tac-Toe game
 """
-# Human score = -1
-# Comp score = 1
+
+"""
+Human score = -1
+Comp score = 1
+"""
+
 human = 'X'
 computer = 'O'
 
@@ -143,7 +147,6 @@ def play():
 
     playerTurn = human
     state = startingState
-    minMaxScore = int()
    
     while True:
         
@@ -174,5 +177,4 @@ def play():
             (x, y) = findBestMove(state)
             state[x][y] = computer
             playerTurn = human
-            
-play()
+
